@@ -18,7 +18,7 @@ public class MassiveChunkTask extends BukkitRunnable {
 
 
     public MassiveChunkTask(Set<Chunk> chunkSet, Consumer<Chunk> consumer) {
-        this(chunkSet, consumer, 60, () -> {
+        this(chunkSet, consumer, 10, () -> {
         });
     }
 

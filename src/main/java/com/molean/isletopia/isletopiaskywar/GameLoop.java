@@ -7,9 +7,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -94,24 +91,6 @@ public class GameLoop {
             ThreadUtils.sleepSecond();
         }
 
-        //set world env
-
-        ScheduleUtils.runSync(() -> {
-
-            world.getWorldBorder().setCenter(255, 255);
-            world.getWorldBorder().setSize(512);
-            world.setGameRule(GameRule.KEEP_INVENTORY, false);
-            world.setGameRule(GameRule.RANDOM_TICK_SPEED, 30);
-            world.setGameRule(GameRule.DO_INSOMNIA, false);
-            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
-            world.setGameRule(GameRule.KEEP_INVENTORY, false);
-            world.setGameRule(GameRule.DO_WEATHER_CYCLE, true);
-            world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
-            world.setTime(1200);
-            ConsoleCommandSender consoleSender = Bukkit.getConsoleSender();
-            Bukkit.dispatchCommand(consoleSender, "weather clear");
-        });
-
 
         //generate map
 
@@ -121,7 +100,6 @@ public class GameLoop {
 
         waiting = true;
         final Biome outerBiome = IslandGenerationUtils.getRandomBiome();
-        IslandManager.getIslandRegion(0).extendBiome(outerBiome, 5000, null);
 
         new IslandGenerateTask(outerBiome, 128, 2000, outerBlocks -> {
             IslandManager.getIslandRegion(0).applyCenter(new CuboidShape(outerBlocks, outerBiome), 2000, () -> {
@@ -141,7 +119,6 @@ public class GameLoop {
         resource = 8;
         final Biome innerBiome = IslandGenerationUtils.getRandomBiome();
         for (int i = 1; i <= 8; i++) {
-            IslandManager.getIslandRegion(0).extendBiome(innerBiome, 500, null);
             final int finalI = i;
             new IslandGenerateTask(innerBiome, 64, 500, innerBlocks -> {
                 IslandManager.getIslandRegion(finalI).applyCenter(new CuboidShape(innerBlocks, innerBiome), 100, () -> {
@@ -152,6 +129,28 @@ public class GameLoop {
         while (resource > 0) {
             ThreadUtils.sleepSecond();
         }
+
+
+        //set world env
+
+        ScheduleUtils.runSync(() -> {
+
+            world.getWorldBorder().setCenter(255, 255);
+            world.getWorldBorder().setSize(512);
+            world.setDifficulty(Difficulty.EASY);
+
+            world.setGameRule(GameRule.KEEP_INVENTORY, false);
+            world.setGameRule(GameRule.RANDOM_TICK_SPEED, 30);
+            world.setGameRule(GameRule.DO_INSOMNIA, false);
+            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+            world.setGameRule(GameRule.KEEP_INVENTORY, false);
+            world.setGameRule(GameRule.DO_WEATHER_CYCLE, true);
+            world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+            world.setTime(1200);
+
+            ConsoleCommandSender consoleSender = Bukkit.getConsoleSender();
+            Bukkit.dispatchCommand(consoleSender, "weather clear");
+        });
 
         MessageUtils.broadcastChat("岛屿生成完毕,准备开始游戏...");
         //allocation group
@@ -178,6 +177,9 @@ public class GameLoop {
         ScheduleUtils.runSync(() -> {
             gameInstance.gamePlayers.forEach((player, integer) -> {
                 Block randomSafeLand = IslandManager.getIslandRegion(integer).getRandomSafeLand(100);
+                if (randomSafeLand == null) {
+                    return;
+                }
                 player.teleport(randomSafeLand.getLocation().add(0, 2, 0));
                 player.getInventory().clear();
                 player.setGameMode(GameMode.SURVIVAL);
@@ -194,6 +196,8 @@ public class GameLoop {
         });
 
 
+        MessageUtils.broadcastChat("§c游戏中的玩家自动进入队伍聊天模式,如果有需要,请以#开头使用全局对话");
+
         MessageUtils.broadcastChat("游戏开始");
 
         gameInstance.gameStatus = GameInstance.GameStatus.STAGE_1;
@@ -207,6 +211,9 @@ public class GameLoop {
                     ArrayList<Inventory> inventories = new ArrayList<>();
                     for (int j = 0; j < 4; j++) {
                         Block randomSafeLand = IslandManager.getIslandRegion(i).getRandomSafeLand(100);
+                        if (randomSafeLand == null) {
+                            continue;
+                        }
                         Block relative = randomSafeLand.getRelative(BlockFace.UP);
                         relative.setType(Material.CHEST);
                         Chest chest = (Chest) relative.getState();
@@ -246,36 +253,14 @@ public class GameLoop {
                 break;
             }
             if (stageTwoWaitTime % 60 == 0) {
-                if (RANDOM.nextBoolean()&&RANDOM.nextBoolean()) {
-                    switch (RANDOM.nextInt(8) + 1) {
-                        case 1 -> {
-                            RandomEventUtils.tntRain();
-                        }
-                        case 2 -> {
-                            RandomEventUtils.mine();
-                        }
-                        case 3 -> {
-                            RandomEventUtils.enchantment();
-                        }
-                        case 4 -> {
-                            RandomEventUtils.wither();
-                        }
-                        case 5 -> {
-                            RandomEventUtils.end();
-                        }
-                        case 6 -> {
-                            RandomEventUtils.nether();
-                        }
-                        case 7 -> {
-                            RandomEventUtils.upgrade();
-                        }
-                        case 8 -> {
-                            RandomEventUtils.night();
-                        }
-                        case 9 -> {
-                            RandomEventUtils.lightning();
-                        }
+                if (RANDOM.nextBoolean()) {
 
+                    Collection<Runnable> values = RandomEventUtils.map.values();
+                    Runnable runnable = new ArrayList<>(values).get(RANDOM.nextInt(values.size()));
+                    try {
+                        runnable.run();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
 
                 } else {
@@ -314,6 +299,9 @@ public class GameLoop {
                     {
                         for (int j = 0; j < 8; j++) {
                             Block randomSafeLand = IslandManager.getIslandRegion(0).getRandomSafeLand(100);
+                            if (randomSafeLand == null) {
+                                continue;
+                            }
                             Block relative = randomSafeLand.getRelative(BlockFace.UP);
                             relative.setType(Material.SHULKER_BOX);
                             ShulkerBox shulkerBox = (ShulkerBox) relative.getState();
@@ -324,6 +312,9 @@ public class GameLoop {
                     }
                     for (int j = 1; j <= 8; j++) {
                         Block randomSafeLand = IslandManager.getIslandRegion(j).getRandomSafeLand(100);
+                        if (randomSafeLand == null) {
+                            continue;
+                        }
                         Block relative = randomSafeLand.getRelative(BlockFace.UP);
                         relative.setType(Material.SHULKER_BOX);
                         ShulkerBox shulkerBox = (ShulkerBox) relative.getState();
@@ -340,14 +331,7 @@ public class GameLoop {
         //stage 4
         MessageUtils.broadcastChat("第四阶段开始");
         MessageUtils.broadcastChat("每秒缩圈0.4格");
-        ScheduleUtils.runSync(() -> {
-            Block randomSafeLand = IslandManager.getIslandRegion(0).getRandomSafeLand(100);
-            Location add = randomSafeLand.getLocation().add(0, 30, 0);
-            EnderDragon entity = (EnderDragon) add.getWorld().spawnEntity(add, EntityType.ENDER_DRAGON);
-            entity.setPhase(EnderDragon.Phase.CIRCLING);
-        });
-
-        for (int i = 0; i < 24*60 * 60; i++) {
+        for (int i = 0; i < 24 * 60 * 60; i++) {
             ThreadUtils.sleepSecond();
             if (isGameOver()) {
                 break;
@@ -356,14 +340,13 @@ public class GameLoop {
                 break;
             }
             if (i % 60 == 0) {
-                MessageUtils.broadcastChat("第四阶段已经过去了"+i+"秒");
+                MessageUtils.broadcastChat("第四阶段已经过去了" + i + "秒");
                 MessageUtils.broadcastChat("剩余玩家:" + IsletopiaSkyWar.getGameInstance().gamePlayers.keySet().size());
             }
             int finalI = i;
             ScheduleUtils.runSync(() -> {
                 world.getWorldBorder().setSize(512 - finalI * 0.4);
             });
-
 
 
         }

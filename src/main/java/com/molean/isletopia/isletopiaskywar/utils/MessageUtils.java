@@ -18,6 +18,6 @@ public enum MessageUtils {
     }
 
     public static void broadcastChat(String message) {
-        Bukkit.broadcast(Component.text(message));
+        Bukkit.broadcast(Component.text("§7[§e系统提示§7] §a" + message));
     }
 }

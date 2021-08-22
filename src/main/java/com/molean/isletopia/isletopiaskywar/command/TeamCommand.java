@@ -26,9 +26,7 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("例如: /team 3");
             return true;
         }
-
         int i;
-
         try {
             i = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
@@ -36,16 +34,15 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("例如: /team 3");
             return true;
         }
-
         if (i <= 0 || i >= 9) {
             sender.sendMessage("用法: /team x (x为1~8的数字)");
             sender.sendMessage("例如: /team 3");
         }
-
         if (TeamSystem.requestGroup((Player) sender, i)) {
             sender.sendMessage("组队成功, 游戏开始后, 你将会被分配到: " + i + "号队伍");
+        } else {
+            sender.sendMessage("组队失败, 该队伍已满2人");
         }
-
         return false;
     }
 

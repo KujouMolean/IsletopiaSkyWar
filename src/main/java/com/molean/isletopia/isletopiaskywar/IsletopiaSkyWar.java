@@ -4,21 +4,16 @@ import com.molean.isletopia.isletopiaskywar.command.RandomEventTestCommand;
 import com.molean.isletopia.isletopiaskywar.command.SDebugCommand;
 import com.molean.isletopia.isletopiaskywar.command.TDebug;
 import com.molean.isletopia.isletopiaskywar.command.TeamCommand;
-import com.molean.isletopia.isletopiaskywar.listeners.CancelTeamDamage;
-import com.molean.isletopia.isletopiaskywar.listeners.CommonListener;
-import com.molean.isletopia.isletopiaskywar.listeners.MineModification;
-import com.molean.isletopia.isletopiaskywar.listeners.PlayerLeftEvent;
+import com.molean.isletopia.isletopiaskywar.listeners.*;
 import com.molean.isletopia.isletopiaskywar.utils.IslandGenerationUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 public final class IsletopiaSkyWar extends JavaPlugin implements Listener {
@@ -46,6 +41,7 @@ public final class IsletopiaSkyWar extends JavaPlugin implements Listener {
         new MineModification();
         new PlayerLeftEvent();
         new TeamCommand();
+        new PlayerChatEvent();
 
 
         Bukkit.getScheduler().runTaskTimer(IsletopiaSkyWar.this, () -> {
@@ -57,28 +53,27 @@ public final class IsletopiaSkyWar extends JavaPlugin implements Listener {
                     continue;
                 }
                 onlinePlayer.setGameMode(GameMode.SPECTATOR);
+                onlinePlayer.displayName(Component.text("§7" + onlinePlayer.getName() + "§r"));
 
             }
         }, 20L, 20L);
 
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            while (true) {
-                try {
-                    GameLoop.asyncLoop();
-                } catch (Exception e) {
-                    e.printStackTrace();
+        Bukkit.getScheduler().runTask(this, () -> {
+            IslandGenerationUtils.init();
+            World world = Bukkit.getWorld("world");
+            assert world != null;
+            world.getWorldBorder().setCenter(255, 255);
+            world.getWorldBorder().setSize(512);
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                while (true) {
+                    try {
+                        GameLoop.asyncLoop();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
+            });
         });
-    }
-
-    @EventHandler
-    public void on(ServerLoadEvent event) {
-        IslandGenerationUtils.init();
-        World world = Bukkit.getWorld("world");
-        assert world != null;
-        world.getWorldBorder().setCenter(255, 255);
-        world.getWorldBorder().setSize(512);
     }
 
 

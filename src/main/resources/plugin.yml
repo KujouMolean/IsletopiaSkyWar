@@ -3,8 +3,12 @@ version: ${project.version}
 main: com.molean.isletopia.isletopiaskywar.IsletopiaSkyWar
 api-version: 1.17
 commands:
-  sdebug: { }
-  edebug: { }
-  tdebug: { }
+  sdebug:
+    permission: isletopia
+  edebug:
+    permission: isletopia
+  tdebug:
+    permission: isletopia
   team: { }
+
 load: STARTUP

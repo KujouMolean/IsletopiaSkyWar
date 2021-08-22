@@ -18,36 +18,7 @@ public class RandomEventTestCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
-        switch (args[0].toLowerCase(Locale.ROOT)) {
-            case "tnt" -> {
-                RandomEventUtils.tntRain();
-            }
-            case "mine" -> {
-                RandomEventUtils.mine();
-            }
-            case "enchantment" -> {
-                RandomEventUtils.enchantment();
-            }
-            case "wither" -> {
-                RandomEventUtils.wither();
-            }
-            case "end" -> {
-                RandomEventUtils.end();
-            }
-            case "night" -> {
-                RandomEventUtils.night();
-
-            }
-            case "nether" -> {
-                RandomEventUtils.nether();
-            }
-            case "upgrade" -> {
-                RandomEventUtils.upgrade();
-            }
-            case "lightning" -> {
-                RandomEventUtils.lightning();
-            }
-        }
+        RandomEventUtils.map.get(args[0].toLowerCase(Locale.ROOT)).run();
 
         return true;
     }

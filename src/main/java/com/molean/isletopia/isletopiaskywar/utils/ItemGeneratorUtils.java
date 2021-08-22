@@ -182,7 +182,7 @@ public class ItemGeneratorUtils {
         itemStacks.add(new ItemStack(ENDER_PEARL, 4));
         itemStacks.add(new ItemStack(DIAMOND, 4));
         itemStacks.add(new ItemStack(ENCHANTING_TABLE, 1));
-        itemStacks.add(new ItemStack(BOOKSHELF, 1));
+        itemStacks.add(new ItemStack(BOOKSHELF, 4));
         itemStacks.add(new ItemStack(BREWING_STAND, 1));
         itemStacks.add(new ItemStack(BLAZE_ROD, 16));
         itemStacks.add(new ItemStack(NETHER_WART, 16));
@@ -201,11 +201,21 @@ public class ItemGeneratorUtils {
     public static List<ItemStack> generateStage3() {
         ArrayList<ItemStack> itemStacks = new ArrayList<>();
         itemStacks.addAll(generate(EXPERIENCE_BOTTLE, 128, 10000));
-        itemStacks.addAll(generate(ENDER_PEARL, 16, 10000));
-        itemStacks.addAll(generate(2, 10000, DIAMOND_BOOTS, DIAMOND_HELMET, DIAMOND_CHESTPLATE, DIAMOND_LEGGINGS));
+        itemStacks.addAll(generate(ENDER_PEARL, 4, 10000));
+        itemStacks.addAll(generate(4, 10000, DIAMOND));
         itemStacks.addAll(generate(1, 2500, DIAMOND_AXE));
         itemStacks.addAll(generate(1, 2500, DIAMOND_SWORD));
-        itemStacks.addAll(generate(NETHERITE_INGOT, 1, 10000));
+        itemStacks.addAll(generate(1, 5000, BOOKSHELF));
+        itemStacks.addAll(generate(1, 1000, NETHERITE_INGOT));
+        itemStacks.addAll(generate(1, 1000, TOTEM_OF_UNDYING));
+        itemStacks.addAll(generate(16, 2000, IRON_INGOT));
+        itemStacks.addAll(generate(1, 10000, SWEET_BERRIES));
+        itemStacks.addAll(generate(4, 2000, SPECTRAL_ARROW));
+        itemStacks.addAll(generate(1, 1000, TRIDENT));
+        itemStacks.addAll(generate(64, 2000, FIREWORK_ROCKET));
+        itemStacks.addAll(generate(10, 2000, RED_MUSHROOM,BROWN_MUSHROOM));
+        itemStacks.addAll(generate(10, 1000, DIAMOND_HORSE_ARMOR, GOLDEN_HORSE_ARMOR, IRON_HORSE_ARMOR, LEATHER_HORSE_ARMOR));
+
         ItemStack itemStack = new ItemStack(POTION, 1);
         PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
         potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 3 * 60 * 20, 0), true);

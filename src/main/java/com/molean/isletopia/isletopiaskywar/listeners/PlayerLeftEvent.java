@@ -3,6 +3,8 @@ package com.molean.isletopia.isletopiaskywar.listeners;
 import com.molean.isletopia.isletopiaskywar.IsletopiaSkyWar;
 import com.molean.isletopia.isletopiaskywar.utils.MessageUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,6 +13,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PlayerLeftEvent implements Listener {
@@ -31,6 +34,8 @@ public class PlayerLeftEvent implements Listener {
     @EventHandler
     public void on(PlayerDeathEvent event) {
         if (IsletopiaSkyWar.getGameInstance().gameStatus.isGaming()) {
+            Location location = event.getEntity().getLocation();
+            location.getWorld().dropItem(location, new ItemStack(Material.NETHERITE_INGOT));
             IsletopiaSkyWar.getGameInstance().gamePlayers.remove(event.getEntity());
             EntityDamageEvent lastDamageCause = event.getEntity().getLastDamageCause();
             if (lastDamageCause instanceof EntityDamageByEntityEvent entityDamageByEntityEvent) {
